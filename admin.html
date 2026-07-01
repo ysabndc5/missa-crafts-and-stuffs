@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Miss A | Crafts and Stuffs</title>
+
+<link rel="icon" href="images/logo.png">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Georgia,sans-serif;
+}
+
+body{
+padding:30px;
+min-height:100vh;
+background:
+linear-gradient(
+135deg,
+#eabcbc,
+#f7d6d6,
+#c9d6ff
+);
+overflow-x:hidden;
+}
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:url("images/logo.png");
+background-size:140px;
+opacity:.15;
+pointer-events:none;
+}
+
+.header-row{
+max-width:1300px;
+margin:auto;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.dashboard-header{
+display:flex;
+align-items:center;
+gap:25px;
+}
+
+.logo{
+width:180px;
+}
+
+h1{
+font-size:48px;
+}
+
+h2{
+font-weight:normal;
+color:#666;
+}
+
+.logout-btn{
+padding:14px 24px;
+background:#ee9c9c;
+color:white;
+border:none;
+border-radius:12px;
+cursor:pointer;
+margin-left:8px;
+}
+
+.summary{
+max-width:1300px;
+margin:auto;
+display:grid;
+grid-template-columns:
+repeat(3,1fr);
+gap:18px;
+margin-bottom:20px;
+}
+
+.card{
+background:
+rgba(255,255,255,.35);
+
+padding:25px;
+
+border-radius:18px;
+
+text-align:center;
+
+backdrop-filter:
+blur(10px);
+}
+
+.card p{
+font-size:34px;
+color:#ff6c6c;
+font-weight:bold;
+}
+
+.container{
+max-width:1300px;
+margin:auto;
+
+padding:20px;
+
+border-radius:18px;
+
+background:
+rgba(255,255,255,.25);
+
+backdrop-filter:
+blur(12px);
+
+overflow:auto;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,
+td{
+padding:14px;
+text-align:center;
+}
+
+th{
+background:#ff7d7d;
+color:white;
+}
+
+td{
+background:
+rgba(255,255,255,.7);
+}
+
+.customer{
+text-align:left;
+line-height:1.7;
+}
+
+.status{
+display:inline-block;
+
+padding:8px 14px;
+
+border-radius:999px;
+
+color:white;
+
+font-weight:bold;
+}
+
+.pending{
+background:#ff9800;
+}
+
+.waiting{
+background:#ff9800;
+}
+
+.paid{
+background:#2e7d32;
+}
+
+.progress{
+background:#9c27b0;
+}
+
+.delivered{
+background:#3a74ff;
+}
+
+button{
+padding:10px 14px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+margin:4px;
+
+color:white;
+}
+
+.view-btn{
+background:#ff9800;
+}
+
+.approve-btn{
+background:#2e7d32;
+}
+
+.progress-btn{
+background:#9c27b0;
+}
+
+.delivered-btn{
+background:#3a74ff;
+}
+
+.print-btn{
+background:#607d8b;
+}
+
+.delete-btn{
+background:#e15757;
+}
+
+.proof{
+font-size:13px;
+word-break:break-word;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header-row">
+
+<div class="dashboard-header">
+
+<img
+src="images/logo.png"
+class="logo"
+>
+
+<div>
+
+<h1>
+Miss A Crafts and Stuffs
+</h1>
+
+<h2>
+Official Admin Panel
+</h2>
+
+</div>
+
+</div>
+
+<div>
+
+<button
+class="logout-btn"
+onclick="exportPDF()"
+>
+Export PDF
+</button>
+
+<button
+class="logout-btn"
+onclick="logout()"
+>
+Logout
+</button>
+
+</div>
+
+</div>
+
+<div class="summary">
+
+<div class="card">
+<h3>Total Orders</h3>
+<p id="totalOrders">0</p>
+</div>
+
+<div class="card">
+<h3>Revenue</h3>
+<p id="revenue">₱0</p>
+</div>
+
+<div class="card">
+<h3>Today's Orders</h3>
+<p id="todayOrders">0</p>
+</div>
+
+</div>
+
+<div class="container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Order ID</th>
+
+<th>Customer</th>
+
+<th>Items</th>
+
+<th>Payment</th>
+
+<th>Proof</th>
+
+<th>Total</th>
+
+<th>Status</th>
+
+<th>Date</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="ordersTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script type="module">
+
+if(
+localStorage.getItem(
+"isAdminLoggedIn"
+)!=="true"
+){
+window.location.href=
+"admin-login.html";
+}
+
+import {
+initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+updateDoc,
+deleteDoc
+}
+from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig={
+
+apiKey:
+"AIzaSyARANfVLvrWtOpr-oSKm1x5QxnVPLOx3fA",
+
+authDomain:
+"missa-crafts-and-stuffs-orders.firebaseapp.com",
+
+projectId:
+"missa-crafts-and-stuffs-orders",
+
+storageBucket:
+"missa-crafts-and-stuffs-orders.firebasestorage.app",
+
+messagingSenderId:
+"307234784231",
+
+appId:
+"1:307234784231:web:c332e48e8f76ae35b1b342"
+
+};
+
+const app=
+initializeApp(
+firebaseConfig
+);
+
+const db=
+getFirestore(
+app
+);
+
+let orders=[];
+
+async function getOrders(){
+
+const snap=
+await getDocs(
+collection(
+db,
+"orders"
+)
+);
+
+orders=[];
+
+snap.forEach(d=>{
+
+orders.push({
+
+firebaseId:
+d.id,
+
+...d.data()
+
+});
+
+});
+
+}
+
+/* ======================
+LOGOUT
+====================== */
+
+function logout(){
+
+localStorage.removeItem(
+"isAdminLoggedIn"
+);
+
+window.location.href=
+"admin-login.html";
+
+}
+
+/* ======================
+APPROVE PAYMENT
+====================== */
+
+async function approvePayment(index){
+
+const order=
+orders[index];
+
+await updateDoc(
+
+doc(
+db,
+"orders",
+order.firebaseId
+),
+
+{
+status:"Paid"
+}
+
+);
+
+renderOrders();
+
+}
+
+/* ======================
+SAVE STATUS
+====================== */
+
+async function saveStatus(
+id,
+status
+){
+
+await updateDoc(
+
+doc(
+db,
+"orders",
+id
+),
+
+{
+status
+}
+
+);
+
+renderOrders();
+
+}
+
+/* ======================
+DELETE
+====================== */
+
+async function deleteOrder(
+index
+){
+
+if(
+!confirm(
+"Delete order?"
+)
+)
+return;
+
+await deleteDoc(
+
+doc(
+db,
+"orders",
+orders[index]
+.firebaseId
+)
+
+);
+
+renderOrders();
+
+}
+
+/* ======================
+VIEW (FIXED CUSTOM ORDERS)
+====================== */
+
+function viewOrder(index){
+
+const o =
+orders[index];
+
+/* CUSTOM ORDER */
+if(
+o.type === "custom"
+){
+
+alert(
+
+`
+
+✨ CUSTOM ORDER
+
+Order ID:
+${o.id}
+
+Customer:
+${o.name}
+
+Phone:
+${o.phone}
+
+Address:
+${o.address}
+
+Type:
+${o.customType || o.category || "-"}
+
+Quantity:
+${o.quantity || 1}
+
+Estimated Budget:
+₱${o.estimated_price || 0}
+
+Description:
+
+${o.description || "-"}
+
+Payment:
+${o.payment_method || "-"}
+
+Total:
+₱${o.total_price || 0}
+
+Status:
+${o.status}
+
+`
+
+);
+
+return;
+
+}
+
+/* NORMAL ORDER */
+
+let items="";
+
+if(
+Array.isArray(
+o.items
+)
+){
+
+items=
+o.items
+.map(i=>`
+
+${i.name||"-"}
+
+Qty:
+${i.quantity||1}
+
+₱${i.price||0}
+
+`)
+.join("\n");
+
+}
+
+alert(
+
+`
+
+ORDER
+
+ID:
+${o.id}
+
+Customer:
+${o.name}
+
+Phone:
+${o.phone}
+
+Address:
+${o.address}
+
+Location:
+${o.location||"-"}
+
+Payment:
+${o.payment_method||"-"}
+
+Proof:
+${o.payment_proof||"-"}
+
+Items:
+
+${items}
+
+Total:
+₱${o.total_price||0}
+
+Status:
+${o.status}
+
+`
+
+);
+
+}
+
+/* ======================
+PRINT RECEIPT
+====================== */
+
+function printReceipt(index){
+
+localStorage.setItem(
+
+"printOrder",
+
+JSON.stringify(
+orders[index]
+)
+
+);
+
+window.open(
+"admin-receipt.html",
+"_blank"
+);
+
+}
+
+/* ======================
+EXPORT PDF
+====================== */
+
+function exportPDF(){
+
+html2pdf()
+
+.from(
+document.querySelector(
+".container"
+)
+)
+
+.save();
+
+}
+
+/* ======================
+RENDER
+====================== */
+
+async function renderOrders(){
+
+await getOrders();
+
+const table=
+document.getElementById(
+"ordersTable"
+);
+
+table.innerHTML=
+"";
+
+let revenue=0;
+
+let today=0;
+
+const now=
+new Date()
+.toDateString();
+
+orders.sort(
+(a,b)=>
+
+new Date(
+b.timestamp
+)
+
+-
+
+new Date(
+a.timestamp
+)
+
+);
+
+orders.forEach(
+(o,i)=>{
+
+let cls=
+"pending";
+
+if(
+o.status==="Waiting Payment Approval"
+)
+cls=
+"waiting";
+
+if(
+o.status==="Paid"
+)
+cls=
+"paid";
+
+if(
+o.status==="In Progress"
+)
+cls=
+"progress";
+
+if(
+o.status==="Delivered"
+)
+cls=
+"delivered";
+
+if(
+o.status==="Paid"
+||
+o.status==="Delivered"
+){
+revenue+=
+Number(
+o.total_price
+||
+0
+);
+}
+
+if(
+
+o.timestamp
+
+&&
+
+new Date(
+o.timestamp
+)
+.toDateString()
+
+===
+
+now
+
+){
+
+today++;
+
+}
+
+table.innerHTML+=`
+
+<tr>
+
+<td>
+
+${o.id}
+
+</td>
+
+<td class="customer">
+
+<b>
+
+${o.name}
+
+</b>
+
+<br>
+
+${o.phone}
+
+<br>
+
+${o.address}
+
+</td>
+
+<td>
+
+${
+Array.isArray(
+o.items
+)
+
+?
+
+o.items
+.map(
+x=>`
+
+<div>
+
+${x.name}
+
+<br>
+
+Qty:
+${x.quantity||1}
+
+</div>
+
+`
+)
+.join(
+"<hr>"
+)
+
+:
+
+"Custom Order"
+
+}
+
+</td>
+
+<td>
+
+${o.payment_method||"-"}
+
+</td>
+
+<td class="proof">
+
+${o.payment_proof||"-"}
+
+</td>
+
+<td>
+
+₱${o.total_price}
+
+</td>
+
+<td>
+
+<span class="status ${cls}">
+
+${o.status}
+
+</span>
+
+</td>
+
+<td>
+
+${new Date(
+o.timestamp
+).toLocaleString()}
+
+</td>
+
+<td>
+
+${
+o.payment_method==="GCash"
+
+&&
+
+o.status==="Waiting Payment Approval"
+
+?
+
+`<button
+class="approve-btn"
+onclick="approvePayment(${i})">
+Approve Payment
+</button>`
+
+:
+
+""
+
+}
+
+<button
+class="view-btn"
+onclick="viewOrder(${i})">
+View
+</button>
+
+<button
+class="print-btn"
+onclick="printReceipt(${i})">
+Print
+</button>
+
+<button
+class="progress-btn"
+onclick="
+saveStatus(
+'${o.firebaseId}',
+'In Progress'
+)">
+Progress
+</button>
+
+<button
+class="delivered-btn"
+onclick="
+saveStatus(
+'${o.firebaseId}',
+'Delivered'
+)">
+Delivered
+</button>
+
+<button
+class="delete-btn"
+onclick="
+deleteOrder(
+${i}
+)">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById(
+"totalOrders"
+).innerText=
+orders.length;
+
+document.getElementById(
+"revenue"
+).innerText=
+"₱"+revenue;
+
+document.getElementById(
+"todayOrders"
+).innerText=
+today;
+
+}
+
+/* EXPOSE */
+
+window.logout=
+logout;
+
+window.exportPDF=
+exportPDF;
+
+window.viewOrder=
+viewOrder;
+
+window.printReceipt=
+printReceipt;
+
+window.saveStatus=
+saveStatus;
+
+window.deleteOrder=
+deleteOrder;
+
+window.approvePayment=
+approvePayment;
+
+/* INIT */
+
+renderOrders();
+
+</script>
+
+</body>
+
+</html>
