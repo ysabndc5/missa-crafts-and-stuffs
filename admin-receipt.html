@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Print Receipt</title>
+
+<style>
+body{
+font-family:Georgia;
+padding:20px;
+margin:0;
+background: linear-gradient(135deg, #eabcbc, #f7d6d6, #c9d6ff);
+}
+
+.receipt{
+max-width:700px;
+margin:auto;
+background: rgba(255,255,255,0.85);
+border:1px solid #ddd;
+padding:20px;
+border-radius:10px;
+backdrop-filter: blur(8px);
+}
+
+h1{text-align:center;}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+background:white;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+.print-btn{
+margin-top:15px;
+padding:10px 15px;
+background:#4CAF50;
+color:white;
+border:none;
+cursor:pointer;
+border-radius:8px;
+}
+
+@media print {
+.print-btn{display:none;}
+body{
+background:white;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="receipt">
+<h1>🧾 Miss A Crafts & Stuffs</h1>
+<p style="text-align:center;">ADMIN INVOICE</p>
+
+<div id="info"></div>
+
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="items"></tbody>
+</table>
+
+<div id="summary" style="margin-top:15px;font-weight:bold;"></div>
+
+<button class="print-btn" onclick="window.print()">Print</button>
+</div>
+
+<script>
+const order = JSON.parse(localStorage.getItem("printOrder"));
+
+if(!order){
+document.body.innerHTML = "<h2>No order found</h2>";
+throw new Error("No order");
+}
+
+/* INFO */
+document.getElementById("info").innerHTML = `
+<b>Order ID:</b> ${order.id}<br>
+<b>Name:</b> ${order.name}<br>
+<b>Phone:</b> ${order.phone}<br>
+<b>Address:</b> ${order.address}<br>
+<b>Location:</b> ${order.location}<br>
+<b>Status:</b> ${order.status}<br>
+<b>Date:</b> ${new Date(order.timestamp).toLocaleString()}
+`;
+
+/* ITEMS */
+let html = "";
+
+order.items.forEach(i=>{
+let qty = i.quantity || 1;
+let total = i.price * qty;
+
+html += `
+<tr>
+<td>${i.name}</td>
+<td>${qty}</td>
+<td>₱${i.price}</td>
+<td>₱${total}</td>
+</tr>
+`;
+});
+
+document.getElementById("items").innerHTML = html;
+
+/* SUMMARY */
+document.getElementById("summary").innerHTML = `
+Subtotal: ₱${order.subtotal}<br>
+Shipping: ₱${order.shipping}<br>
+Grand Total: ₱${order.total_price}
+`;
+</script>
+
+</body>
+</html>
