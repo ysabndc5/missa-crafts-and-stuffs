@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+Miss A | Crafts and Stuffs
+</title>
+
+<link rel="icon" href="images/logo.png">
+
+<!-- PDF LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+
+/* ======================
+BASE STYLE
+====================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Georgia,sans-serif;
+}
+
+body{
+padding:30px;
+min-height:100vh;
+
+background:
+linear-gradient(
+135deg,
+#eabcbc,
+#f7d6d6,
+#c9d6ff
+);
+
+overflow-x:hidden;
+}
+
+body::before{
+content:"";
+position:fixed;
+inset:0;
+background:url("images/logo.png");
+background-size:140px;
+opacity:.15;
+pointer-events:none;
+}
+
+.header-row{
+max-width:1200px;
+margin:auto;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.dashboard-header{
+display:flex;
+align-items:center;
+gap:25px;
+}
+
+.logo{
+width:180px;
+}
+
+h1{font-size:48px;}
+h2{font-weight:normal;color:#666;}
+
+.logout-btn{
+padding:14px 24px;
+background:#ee9c9c;
+color:white;
+border:none;
+border-radius:12px;
+cursor:pointer;
+margin-left:8px;
+}
+
+.summary{
+max-width:1200px;
+margin:auto;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:18px;
+margin-bottom:20px;
+}
+
+.card{
+background:rgba(255,255,255,.35);
+padding:25px;
+border-radius:18px;
+text-align:center;
+backdrop-filter:blur(10px);
+}
+
+.card p{
+font-size:34px;
+color:#ff6c6c;
+font-weight:bold;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+padding:20px;
+border-radius:18px;
+background:rgba(255,255,255,.25);
+backdrop-filter:blur(12px);
+overflow-x:auto;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th,td{
+padding:14px;
+text-align:center;
+}
+
+th{
+background:#ff7d7d;
+color:white;
+}
+
+td{
+background:rgba(255,255,255,.7);
+}
+
+.customer{
+text-align:left;
+line-height:1.8;
+}
+
+.status{
+display:inline-block;
+padding:8px 14px;
+border-radius:999px;
+color:white;
+font-weight:bold;
+}
+
+.pending{background:#ff9800;}
+.progress{background:#9c27b0;}
+.delivered{background:#3a74ff;}
+
+button{
+padding:10px 14px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin:4px;
+color:white;
+}
+
+.progress-btn{background:#9c27b0;}
+.delivered-btn{background:#3a74ff;}
+.delete-btn{background:#e15757;}
+
+.custom-order{
+background:#fff0f6;
+padding:12px;
+border-radius:12px;
+border:2px dashed #ff8aac;
+}
+
+.empty{padding:30px;}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header-row">
+
+<div class="dashboard-header">
+<img src="images/logo.png" class="logo">
+
+<div>
+<h1>Miss A Crafts and Stuffs</h1>
+<h2>Official Admin Panel</h2>
+</div>
+
+</div>
+
+<!-- BUTTONS -->
+<div>
+
+<button class="logout-btn" onclick="exportPDF()">
+Export PDF
+</button>
+
+<button class="logout-btn" onclick="resetOrders()">
+Reset Orders
+</button>
+
+<button class="logout-btn" onclick="logout()">
+Logout
+</button>
+
+</div>
+
+</div>
+
+<!-- SUMMARY -->
+<div class="summary">
+
+<div class="card">
+<h3>Total Orders</h3>
+<p id="totalOrders">0</p>
+</div>
+
+<div class="card">
+<h3>Revenue</h3>
+<p id="revenue">₱0</p>
+</div>
+
+<div class="card">
+<h3>Today's Orders</h3>
+<p id="todayOrders">0</p>
+</div>
+
+</div>
+
+<!-- TABLE -->
+<div class="container">
+
+<table>
+<thead>
+<tr>
+<th>Order ID</th>
+<th>Customer</th>
+<th>Items</th>
+<th>Total</th>
+<th>Status</th>
+<th>Date</th>
+<th>Actions</th>
+</tr>
+</thead>
+
+<tbody id="ordersTable"></tbody>
+
+</table>
+
+</div>
+
+<script type="module">
+
+/* ======================
+AUTH
+====================== */
+
+if(localStorage.getItem("isAdminLoggedIn") !== "true"){
+window.location.href="admin-login.html";
+}
+
+function logout(){
+localStorage.removeItem("isAdminLoggedIn");
+window.location.href="admin-login.html";
+}
+
+/* ======================
+FIREBASE
+====================== */
+
+import {
+initializeApp
+}
+from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getFirestore,
+collection,
+getDocs,
+doc,
+updateDoc,
+deleteDoc
+}
+from
+"https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+
+const firebaseConfig={
+
+apiKey:"AIzaSyARANfVLvrWtOpr-oSKm1x5QxnVPLOx3fA",
+
+authDomain:
+"missa-crafts-and-stuffs-orders.firebaseapp.com",
+
+projectId:
+"missa-crafts-and-stuffs-orders",
+
+storageBucket:
+"missa-crafts-and-stuffs-orders.firebasestorage.app",
+
+messagingSenderId:
+"307234784231",
+
+appId:
+"1:307234784231:web:c332e48e8f76ae35b1b342"
+
+};
+
+const app=
+initializeApp(firebaseConfig);
+
+const db=
+getFirestore(app);
+
+let orders=[];
+
+/* ======================
+GET ORDERS
+====================== */
+
+async function getOrders(){
+
+const snap=
+await getDocs(
+collection(db,"orders")
+);
+
+orders=[];
+
+snap.forEach(docu=>{
+
+orders.push({
+
+firebaseId:
+docu.id,
+
+...docu.data()
+
+});
+
+});
+
+}
+
+/* ======================
+STATUS
+====================== */
+
+async function saveStatus(
+firebaseId,
+status
+){
+
+await updateDoc(
+
+doc(
+db,
+"orders",
+firebaseId
+),
+
+{
+status
+}
+
+);
+
+await renderOrders();
+
+}
+
+/* ======================
+VIEW
+====================== */
+
+function viewOrder(index){
+
+const order=
+orders[index];
+
+let itemsText="-";
+
+if(order.type==="custom"){
+
+itemsText=
+order.description||
+"Custom Order";
+
+}
+
+else if(Array.isArray(order.items)){
+
+itemsText=
+order.items
+.map(i=>`
+
+${i.category?`[${i.category}]<br>`:""}
+
+${i.name||
+i.product||
+"Unnamed Product"}
+
+<br>
+
+Qty:
+${i.qty||1}
+
+<br>
+
+₱${i.price||0}
+
+`)
+.join("\n\n");
+
+}
+
+alert(
+
+`Customer:
+${order.name||"-"}
+
+Phone:
+${order.phone||"-"}
+
+Address:
+${order.address||"-"}
+
+Items:
+
+${itemsText}
+
+Status:
+${order.status||"Pending"}
+
+Total:
+₱${order.total_price||0}`
+
+);
+
+}
+
+/* ======================
+EXPORT
+====================== */
+
+async function exportPDF(){
+
+await getOrders();
+
+if(
+orders.length===0
+){
+
+alert(
+"No orders"
+);
+
+return;
+
+}
+
+html2pdf()
+.from(
+document.querySelector(
+".container"
+)
+)
+.save();
+
+}
+
+/* ======================
+RESET
+====================== */
+
+function resetOrders(){
+
+alert(
+"Reset temporarily disabled"
+);
+
+}
+
+/* ======================
+ACTIONS
+====================== */
+
+async function markProgress(index){
+
+await saveStatus(
+orders[index].firebaseId,
+"In Progress"
+);
+
+}
+
+async function deliverOrder(index){
+
+await saveStatus(
+orders[index].firebaseId,
+"Delivered"
+);
+
+}
+
+async function deleteOrder(index){
+
+if(
+!confirm(
+"Delete this order?"
+)
+)return;
+
+await deleteDoc(
+
+doc(
+db,
+"orders",
+orders[index].firebaseId
+)
+
+);
+
+await renderOrders();
+
+}
+
+/* ======================
+RENDER
+====================== */
+
+async function renderOrders(){
+
+await getOrders();
+
+const table=
+document.getElementById(
+"ordersTable"
+);
+
+table.innerHTML="";
+
+let revenue=0;
+let today=0;
+
+const now=
+new Date()
+.toDateString();
+
+if(
+orders.length===0
+){
+
+table.innerHTML=
+`
+<tr>
+<td colspan="7">
+No orders yet
+</td>
+</tr>
+`;
+
+document.getElementById(
+"totalOrders"
+).innerText=0;
+
+document.getElementById(
+"revenue"
+).innerText="₱0";
+
+document.getElementById(
+"todayOrders"
+).innerText=0;
+
+return;
+
+}
+
+orders
+.slice()
+.reverse()
+.forEach(
+(order,r)=>{
+
+const index=
+orders.length-1-r;
+
+let status=
+order.status||
+"Pending";
+
+let cls=
+"pending";
+
+if(
+status==="In Progress"
+)
+cls=
+"progress";
+
+if(
+status==="Delivered"
+)
+cls=
+"delivered";
+
+const total=
+order.total_price||
+0;
+
+revenue+=
+Number(
+total
+);
+
+if(
+order.timestamp
+&&
+new Date(
+order.timestamp
+)
+.toDateString()
+===now
+){
+today++;
+}
+
+table.innerHTML+=`
+
+<tr>
+
+<td>
+${order.id||"-"}
+</td>
+
+<td class="customer">
+
+<b>
+${order.name||"-"}
+</b>
+
+<br>
+
+${order.phone||"-"}
+
+<br>
+
+${order.address||"-"}
+
+</td>
+
+<td>
+
+<td>
+
+${
+order.type==="custom"
+
+?
+
+`
+<div class="custom-order">
+
+✨ CUSTOM ORDER
+
+<br><br>
+
+${order.description||"-"}
+
+</div>
+`
+
+:
+
+Array.isArray(order.items)
+
+?
+
+order.items
+.map(i=>`
+
+${i.category
+?`<small>${i.category}</small><br>`
+:""}
+
+${i.name||
+i.product||
+"Unnamed Product"}
+
+<br>
+
+Qty:
+${i.qty||1}
+
+`)
+
+.join("<hr>")
+
+:
+
+order.product||
+
+"-"
+
+}
+
+</td>
+
+</td>
+
+<td>
+
+₱${total}
+
+</td>
+
+<td>
+
+<span class="status ${cls}">
+${status}
+</span>
+
+</td>
+
+<td>
+
+${order.timestamp||"-"}
+
+</td>
+
+<td>
+
+<button
+class="progress-btn"
+onclick="markProgress(${index})">
+In Progress
+</button>
+
+<button
+class="delivered-btn"
+onclick="deliverOrder(${index})">
+Delivered
+</button>
+
+<button
+class="progress-btn"
+onclick="viewOrder(${index})">
+View
+</button>
+
+<button
+class="delete-btn"
+onclick="deleteOrder(${index})">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+document.getElementById(
+"totalOrders"
+).innerText=
+orders.length;
+
+document.getElementById(
+"revenue"
+).innerText=
+"₱"+revenue;
+
+document.getElementById(
+"todayOrders"
+).innerText=
+today;
+
+}
+
+/* expose */
+
+window.logout=logout;
+window.exportPDF=exportPDF;
+window.resetOrders=resetOrders;
+window.viewOrder=viewOrder;
+window.markProgress=markProgress;
+window.deliverOrder=deliverOrder;
+window.deleteOrder=deleteOrder;
+
+renderOrders();
+
+</script>
+
+</body>
+</html>
