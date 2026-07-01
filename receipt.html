@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Receipt - Miss A Crafts</title>
+
+<style>
+body{
+font-family:Georgia;
+padding:20px;
+margin:0;
+background: linear-gradient(135deg, #eabcbc, #f7d6d6, #c9d6ff);
+}
+
+.receipt{
+max-width:700px;
+margin:auto;
+background: rgba(255,255,255,0.85);
+border:1px solid #ddd;
+padding:20px;
+border-radius:10px;
+backdrop-filter: blur(8px);
+}
+
+h1{text-align:center;}
+
+p{text-align:center;color:#555;}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+background:white;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+text-align:center;
+}
+
+.total{
+margin-top:15px;
+font-weight:bold;
+line-height:1.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="receipt">
+
+<h1>🧾 Miss A Crafts & Stuffs</h1>
+<p>Official Receipt / Invoice</p>
+
+<div id="info" class="info"></div>
+
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody id="items"></tbody>
+</table>
+
+<div id="summary" class="total"></div>
+
+</div>
+
+<script>
+const order = JSON.parse(localStorage.getItem("lastOrder"));
+
+if(!order){
+document.body.innerHTML = "<h2 style='text-align:center'>No receipt found</h2>";
+throw new Error("No order found");
+}
+
+/* CUSTOMER INFO (NO STATUS SHOWN) */
+document.getElementById("info").innerHTML = `
+<b>Order ID:</b> ${order.id}<br>
+<b>Name:</b> ${order.name}<br>
+<b>Phone:</b> ${order.phone}<br>
+<b>Address:</b> ${order.address}<br>
+<b>Location:</b> ${order.location}<br>
+<b>Date:</b> ${new Date(order.timestamp).toLocaleString()}
+`;
+
+/* ITEMS */
+let html = "";
+
+order.items.forEach(item => {
+let qty = item.quantity || 1;
+let total = item.price * qty;
+
+html += `
+<tr>
+<td>${item.name}</td>
+<td>${qty}</td>
+<td>₱${item.price}</td>
+<td>₱${total}</td>
+</tr>
+`;
+});
+
+document.getElementById("items").innerHTML = html;
+
+/* SUMMARY */
+document.getElementById("summary").innerHTML = `
+Subtotal: ₱${order.subtotal}<br>
+Shipping: ₱${order.shipping}<br>
+Grand Total: ₱${order.total_price}
+`;
+</script>
+
+</body>
+</html>
