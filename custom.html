@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Miss A | Crafts and Stuffs</title>
+
+<link rel="icon" type="image/png" href="images/logo.png">
+<link rel="apple-touch-icon" href="images/logo.png">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- DASHBOARD -->
+<a href="index.html" class="dashboard-btn">
+🏠 Dashboard
+</a>
+
+<section class="custom">
+
+<div class="custom-box">
+
+<h1>Custom Order ✨</h1>
+
+<p>
+Tell us your dream handmade piece and we'll create it with love.
+</p>
+
+<!-- NOTICE -->
+<div style="
+margin:12px 0 18px;
+padding:10px 14px;
+background:#fff5d8;
+border-left:5px solid #ffb74d;
+border-radius:8px;
+color:#555;
+line-height:1.5;
+font-size:13px;
+">
+
+<b>📌 Custom Order Notice</b>
+
+<br><br>
+
+Orders may temporarily appear as <b>₱0</b>.
+
+Final pricing will be calculated by the admin based on design, materials, size, and quantity.
+
+<br><br>
+
+💡 Estimated Budget is optional and does not become the final price.
+
+</div>
+
+<!-- FORM -->
+<form id="orderForm">
+
+<input
+type="hidden"
+name="timestamp"
+id="timestamp"
+>
+
+<!-- CUSTOMER -->
+<input
+type="text"
+name="customer_name"
+placeholder="Full Name"
+required
+>
+
+<input
+type="tel"
+name="contact_number"
+placeholder="Contact Number"
+required
+>
+
+<!-- ORDER TYPE -->
+<select
+name="order_type"
+required
+>
+
+<option value="">
+Select Order Type
+</option>
+
+<option value="bouquets">
+Bouquet
+</option>
+
+<option value="keychains">
+Mirror Keychain
+</option>
+
+<option value="cardholders">
+Card Holder
+</option>
+
+</select>
+
+<!-- QUANTITY -->
+<input
+type="number"
+name="quantity"
+min="1"
+value="1"
+required
+>
+
+<!-- ADDRESS -->
+<input
+type="text"
+name="address"
+placeholder="Delivery Address"
+required
+>
+
+<!-- DESCRIPTION -->
+<textarea
+name="description"
+placeholder="Describe your custom order"
+required
+></textarea>
+
+<!-- OPTIONAL -->
+<input
+type="number"
+name="estimated_price"
+placeholder="Estimated Budget (optional)"
+>
+
+<button type="submit">
+
+PLACE ORDER
+
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+<!-- SUCCESS MODAL -->
+<div
+id="successModal"
+
+style="
+display:none;
+
+position:fixed;
+
+inset:0;
+
+background:rgba(0,0,0,.6);
+
+justify-content:center;
+
+align-items:center;
+
+z-index:9999;
+"
+>
+
+<div
+
+style="
+background:white;
+
+padding:30px;
+
+border-radius:15px;
+
+text-align:center;
+
+width:320px;
+"
+
+>
+
+<h2>
+
+🎉 Order Placed!
+
+</h2>
+
+<br>
+
+<p>
+
+Your custom order has been submitted successfully.
+
+</p>
+
+<br>
+
+<p>
+
+We will review your request and contact you soon.
+
+</p>
+
+</div>
+
+</div>
+
+<!-- TIMESTAMP -->
+<script>
+
+document
+.getElementById(
+"orderForm"
+)
+.addEventListener(
+"submit",
+
+function(){
+
+document.getElementById(
+"timestamp"
+).value=
+
+new Date()
+.toISOString();
+
+}
+
+);
+
+</script>
+
+<!-- ORDER LOGIC -->
+<script
+type="module"
+src="order.js"
+></script>
+
+</body>
+
+</html>
