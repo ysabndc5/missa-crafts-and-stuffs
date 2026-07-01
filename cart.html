@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Miss A | Crafts and Stuffs</title>
+
+<link rel="icon" href="images/logo.png">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<a href="index.html" class="dashboard-btn">🏠 Dashboard</a>
+
+<div class="checkout-container">
+
+<!-- CART -->
+<div class="cart-section">
+<h1><i>Checkout Cart 🛒</i></h1>
+<div id="cart-items"></div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-section">
+
+<h2>🧾 Order Summary</h2>
+
+<div class="summary-box">
+<div class="row">
+<span>Items</span>
+<span id="subtotal">₱0</span>
+</div>
+
+<div class="row">
+<span>Shipping</span>
+<span id="shipping">₱0</span>
+</div>
+
+<hr>
+
+<div class="row total">
+<span>Total</span>
+<span id="grand-total">₱0</span>
+</div>
+</div>
+
+<h2>🧍 Customer Information</h2>
+
+<form>
+
+<input type="text" id="customerName" placeholder="Full Name" required>
+
+<select id="location" required>
+<option value="">Select Province / Area</option>
+<option value="Mexico, Pampanga">Mexico, Pampanga</option>
+<option value="Pampanga">Pampanga</option>
+<option value="Bulacan">Bulacan</option>
+<option value="Tarlac">Tarlac</option>
+<option value="Bataan">Bataan</option>
+<option value="Metro Manila">Metro Manila</option>
+<option value="Laguna">Laguna</option>
+<option value="Cavite">Cavite</option>
+<option value="Others">Others</option>
+</select>
+
+<input type="text" id="customerAddress" placeholder="Address" required>
+<input type="tel" id="customerPhone" placeholder="Phone" required>
+
+<button type="button" onclick="checkout()">Place Order</button>
+
+</form>
+
+</div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="successModal" style="
+display:none;
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.6);
+justify-content:center;
+align-items:center;
+z-index:9999;
+">
+  <div style="
+  background:white;
+  padding:30px;
+  border-radius:15px;
+  text-align:center;
+  width:300px;
+  ">
+    <h2>🎉 Order Placed!</h2>
+    <p>Your order has been successfully submitted.</p>
+    <button onclick="closeSuccess()" style="
+      margin-top:15px;
+      padding:10px 20px;
+      border:none;
+      background:#4CAF50;
+      color:white;
+      border-radius:8px;
+      cursor:pointer;
+    ">OK</button>
+  </div>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyARANfVLvrWtOpr-oSKm1x5QxnVPLOx3fA",
+    authDomain: "missa-crafts-and-stuffs-orders.firebaseapp.com",
+    projectId: "missa-crafts-and-stuffs-orders",
+    storageBucket: "missa-crafts-and-stuffs-orders.firebasestorage.app",
+    messagingSenderId: "307234784231",
+    appId: "1:307234784231:web:c332e48e8f76ae35b1b342"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= CART ================= */
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveCart() {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    renderCart();
+    updateTotals();
+}
+
+/* ================= RENDER ================= */
+
+function renderCart() {
+    const container = document.getElementById("cart-items");
+    container.innerHTML = "";
+
+    cart.forEach((item, index) => {
+
+        let qty = item.quantity || 1;
+        let subtotal = item.price * qty;
+
+        container.innerHTML += `
+        <div class="cart-item">
+
+            <div>
+                <h3>${item.name}</h3>
+                <p>₱${item.price}</p>
+            </div>
+
+            <div>
+                <button onclick="decreaseQty(${index})">-</button>
+                <span>${qty}</span>
+                <button onclick="increaseQty(${index})">+</button>
+            </div>
+
+            <div>₱${subtotal}</div>
+
+            <button onclick="removeItem(${index})">🗑</button>
+
+        </div>
+        `;
+    });
+
+    updateTotals();
+}
+
+/* ================= CART ACTIONS ================= */
+
+function increaseQty(index) {
+    cart[index].quantity = (cart[index].quantity || 1) + 1;
+    saveCart();
+}
+
+function decreaseQty(index) {
+    cart[index].quantity = (cart[index].quantity || 1) - 1;
+
+    if (cart[index].quantity <= 0) {
+        cart.splice(index, 1);
+    }
+
+    saveCart();
+}
+
+function removeItem(index) {
+    cart.splice(index, 1);
+    saveCart();
+}
+
+window.increaseQty = increaseQty;
+window.decreaseQty = decreaseQty;
+window.removeItem = removeItem;
+
+/* ================= SHIPPING ================= */
+
+function getShipping(location) {
+    switch(location) {
+        case "Mexico, Pampanga": return 5;
+        case "Pampanga": return 10;
+        case "Bulacan": return 50;
+        case "Tarlac": return 50;
+        case "Bataan": return 60;
+        case "Metro Manila": return 80;
+        case "Laguna": return 100;
+        case "Cavite": return 100;
+        default: return 150;
+    }
+}
+
+/* ================= TOTALS (FIXED) ================= */
+
+function updateTotals() {
+    let subtotal = 0;
+
+    cart.forEach(item => {
+        subtotal += item.price * (item.quantity || 1);
+    });
+
+    const locationEl = document.getElementById("location");
+    const location = locationEl ? locationEl.value.trim() : "";
+
+    const shipping = getShipping(location);
+    const total = subtotal + shipping;
+
+    document.getElementById("subtotal").textContent = "₱" + subtotal;
+    document.getElementById("shipping").textContent = "₱" + shipping;
+    document.getElementById("grand-total").textContent = "₱" + total;
+}
+
+/* LIVE UPDATE SHIPPING */
+document.getElementById("location").addEventListener("change", updateTotals);
+
+/* ================= CHECKOUT ================= */
+
+async function checkout() {
+
+const name = document.getElementById("customerName").value.trim();
+const location = document.getElementById("location").value;
+const address = document.getElementById("customerAddress").value.trim();
+const phone = document.getElementById("customerPhone").value.trim();
+
+if(!name || !location || !address || !phone){
+    alert("Complete info");
+    return;
+}
+
+if(cart.length === 0){
+    alert("Empty cart");
+    return;
+}
+
+let subtotal = 0;
+
+cart.forEach(item => {
+    subtotal += item.price * (item.quantity || 1);
+});
+
+const shipping = getShipping(location);
+const total = subtotal + shipping;
+
+const order = {
+    id: "ORD-" + Date.now(),
+    name,
+    location,
+    address,
+    phone,
+    items: cart,
+    subtotal,
+    shipping,
+    total_price: total,
+    status: "Pending",
+    timestamp: new Date().toISOString()
+};
+
+await addDoc(collection(db, "orders"), order);
+
+localStorage.removeItem("cart");
+
+showSuccess();
+
+}
+
+/* ================= SUCCESS MODAL ================= */
+
+function showSuccess() {
+    document.getElementById("successModal").style.display = "flex";
+
+    setTimeout(() => {
+        window.location.href = "index.html";
+    }, 2500);
+}
+
+function closeSuccess() {
+    document.getElementById("successModal").style.display = "none";
+}
+
+window.closeSuccess = closeSuccess;
+window.checkout = checkout;
+
+/* INIT */
+document.addEventListener("DOMContentLoaded", () => {
+    renderCart();
+    updateTotals();
+});
+
+</script>
+
+</body>
+</html>
