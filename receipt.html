@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Receipt - Miss A Crafts</title>
+
+<style>
+body{
+font-family: Arial, sans-serif;
+background:#f5f5f5;
+padding:30px;
+}
+
+.receipt{
+max-width:800px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+margin-bottom:10px;
+}
+
+.info{
+margin-bottom:20px;
+line-height:1.6;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:left;
+}
+
+th{
+background:#ff7d7d;
+color:white;
+}
+
+.total{
+text-align:right;
+margin-top:20px;
+font-size:18px;
+font-weight:bold;
+}
+
+.btn{
+margin-top:20px;
+display:block;
+width:100%;
+padding:12px;
+background:#ff7d7d;
+color:white;
+border:none;
+cursor:pointer;
+border-radius:8px;
+font-size:16px;
+}
+
+@media print {
+.btn { display:none; }
+body { background:white; }
+.receipt { box-shadow:none; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="receipt">
+
+<h1>🧾 Miss A Crafts & Stuffs</h1>
+<p style="text-align:center;">Official Receipt / Invoice</p>
+
+<div id="info" class="info"></div>
+
+<table>
+<thead>
+<tr>
+<th>Product</th>
+<th>Qty</th>
+<th>Price</th>
+<th>Total</th>
+</tr>
+</thead>
+
+<tbody id="items"></tbody>
+</table>
+
+<div id="summary" class="total"></div>
+
+<button class="btn" onclick="window.print()">Print Receipt</button>
+
+</div>
+
+<script>
+const order = JSON.parse(localStorage.getItem("lastOrder"));
+
+if(!order){
+document.body.innerHTML = "<h2 style='text-align:center'>No receipt found</h2>";
+}
+
+document.getElementById("info").innerHTML = `
+<b>Order ID:</b> ${order.id}<br>
+<b>Name:</b> ${order.name}<br>
+<b>Phone:</b> ${order.phone}<br>
+<b>Address:</b> ${order.address}<br>
+<b>Location:</b> ${order.location}<br>
+<b>Status:</b> ${order.status}<br>
+<b>Date:</b> ${new Date(order.timestamp).toLocaleString()}
+`;
+
+let html = "";
+order.items.forEach(item => {
+let qty = item.quantity || 1;
+let total = item.price * qty;
+
+html += `
+<tr>
+<td>${item.name}</td>
+<td>${qty}</td>
+<td>₱${item.price}</td>
+<td>₱${total}</td>
+</tr>
+`;
+});
+
+document.getElementById("items").innerHTML = html;
+
+document.getElementById("summary").innerHTML = `
+Subtotal: ₱${order.subtotal}<br>
+Shipping: ₱${order.shipping}<br>
+Grand Total: ₱${order.total_price}
+`;
+</script>
+
+</body>
+</html>
