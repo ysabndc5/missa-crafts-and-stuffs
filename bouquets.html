@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<link rel="icon" type="image/png" href="images/logo.png">
+<link rel="apple-touch-icon" href="images/logo.png">
+
+<link rel="stylesheet" href="style.css">
+
+<title>Miss A | Crafts and Stuffs</title>
+
+</head>
+
+<body>
+
+<!-- 🏠 DASHBOARD BUTTON -->
+<a href="index.html" class="dashboard-btn">
+🏠 Dashboard
+</a>
+
+<section class="custom">
+
+<div class="custom-box">
+
+<h1>BOUQUETS</h1>
+
+<div class="products">
+
+<!-- 🌼 Sunshine Daisy -->
+<div class="product">
+
+<img src="images/bouquet1.png">
+
+<h3>Sunshine Daisy</h3>
+
+<p>
+A piece of sunshine that brightens a smile.
+</p>
+
+<p>
+Price: ₱299
+</p>
+
+<center>
+
+<button
+onclick="addBouquet('Sunshine Daisy',299)">
+
+Add to Cart
+
+</button>
+
+</center>
+
+</div>
+
+<!-- 🤎 Kayumanggi -->
+<div class="product">
+
+<img src="images/bouquet2.png">
+
+<h3>Kayumanggi</h3>
+
+<p>
+A color to remind anyone that they are special.
+</p>
+
+<p>
+Price: ₱499
+</p>
+
+<center>
+
+<button
+onclick="addBouquet('Kayumanggi',499)">
+
+Add to Cart
+
+</button>
+
+</center>
+
+</div>
+
+<!-- 🌻 Sunflower -->
+<div class="product">
+
+<img src="images/bouquet3.png">
+
+<h3>Sunflower</h3>
+
+<p>
+A simple yet elegant masterpiece that can light up anyone's mood.
+</p>
+
+<p>
+Price: ₱350
+</p>
+
+<center>
+
+<button
+onclick="addBouquet('Sunflower',350)">
+
+Add to Cart
+
+</button>
+
+</center>
+
+</div>
+
+<!-- 🌸 Sakura -->
+<div class="product">
+
+<img src="images/bouquet4.png">
+
+<h3>Sakura</h3>
+
+<p>
+A single bouquet that speaks a thousand words.
+</p>
+
+<p>
+Price: ₱75
+</p>
+
+<center>
+
+<button
+onclick="addBouquet('Sakura',75)">
+
+Add to Cart
+
+</button>
+
+</center>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<script src="cart.js"></script>
+
+<script>
+
+function addBouquet(
+productName,
+price
+){
+
+addToCart(
+productName,
+price
+);
+
+}
+
+</script>
+
+</body>
+</html>

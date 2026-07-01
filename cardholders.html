@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<link rel="icon" type="image/png" href="images/logo.png">
+<link rel="apple-touch-icon" href="images/logo.png">
+
+<link rel="stylesheet" href="style.css">
+
+<title>Miss A | Crafts and Stuffs</title>
+
+</head>
+
+<body>
+
+<!-- 🏠 DASHBOARD BUTTON -->
+<a href="index.html" class="dashboard-btn">
+🏠 Dashboard
+</a>
+
+<section class="custom">
+
+<div class="custom-box">
+
+<h1>CARD HOLDERS</h1>
+
+<div class="product">
+<img src="images/cardholder.png">
+</div>
+
+<br>
+
+<label>Choose Color</label>
+
+<select id="color">
+
+<option value="Red">Red</option>
+<option value="Grey">Grey</option>
+<option value="Mint">Mint</option>
+<option value="Pink">Pink</option>
+<option value="Brown">Brown</option>
+<option value="Black">Black</option>
+<option value="Navy Blue">Navy Blue</option>
+
+</select>
+
+<br><br>
+
+<label>Custom Option</label>
+
+<select id="custom">
+
+<option value="40">
+Plain Color (₱40)
+</option>
+
+<option value="60">
+With Stamp (₱60)
+</option>
+
+</select>
+
+<br><br>
+
+<div
+id="stampBox"
+style="display:none;">
+
+<label>
+Enter Name / Text
+</label>
+
+<input
+type="text"
+id="stampText"
+placeholder="e.g. Alyssa">
+
+</div>
+
+<p>
+
+Price:
+₱<span id="price">40</span>
+
+</p>
+
+<center>
+
+<button
+onclick="addCardHolder()">
+
+Add To Cart
+
+</button>
+
+</center>
+
+</div>
+
+</section>
+
+<script src="cart.js"></script>
+
+<script>
+
+const custom =
+document.getElementById("custom");
+
+const priceDisplay =
+document.getElementById("price");
+
+const stampBox =
+document.getElementById("stampBox");
+
+
+/* UPDATE PRICE */
+custom.addEventListener(
+"change",
+
+function(){
+
+const selected =
+parseInt(this.value);
+
+priceDisplay.innerText =
+selected;
+
+if(selected===60){
+
+stampBox.style.display =
+"block";
+
+}
+else{
+
+stampBox.style.display =
+"none";
+
+document.getElementById(
+"stampText"
+).value="";
+
+}
+
+}
+
+);
+
+
+/* ADD TO CART */
+function addCardHolder(){
+
+const color =
+document.getElementById(
+"color"
+).value;
+
+const selected =
+parseInt(
+document.getElementById(
+"custom"
+).value
+);
+
+const stamp =
+document.getElementById(
+"stampText"
+).value
+.trim();
+
+let productName;
+let finalPrice;
+
+
+/* PLAIN = ₱40 */
+if(selected===40){
+
+productName =
+color +
+" (Plain Color)";
+
+finalPrice =
+40;
+
+}
+
+
+/* WITH STAMP = ₱60 */
+else{
+
+productName =
+color +
+" (With Stamp)";
+
+if(stamp){
+
+productName +=
+" - " +
+stamp;
+
+}
+
+finalPrice =
+60;
+
+}
+
+
+addToCart(
+productName,
+finalPrice
+);
+
+
+/* RESET */
+custom.value="40";
+
+priceDisplay.innerText="40";
+
+stampBox.style.display=
+"none";
+
+document.getElementById(
+"stampText"
+).value="";
+
+}
+
+</script>
+
+</body>
+</html>

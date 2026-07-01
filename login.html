@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>
+Customer Login
+</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<a href="index.html"
+class="dashboard-btn">
+
+🏠 Dashboard
+
+</a>
+
+<section class="custom">
+
+<div class="custom-box">
+
+<h1>
+
+Customer Login 💗
+
+</h1>
+
+<input
+id="username"
+placeholder="Enter your name">
+
+<br><br>
+
+<button
+onclick="login()">
+
+Login
+
+</button>
+
+</div>
+
+</section>
+
+
+<script>
+
+function login(){
+
+const user=
+document.getElementById(
+"username"
+).value;
+
+
+if(!user){
+
+alert(
+"Enter your name"
+);
+
+return;
+
+}
+
+
+localStorage.setItem(
+"currentUser",
+user
+);
+
+window.location.href=
+"myorders.html";
+
+}
+
+</script>
+
+</body>
+
+</html>

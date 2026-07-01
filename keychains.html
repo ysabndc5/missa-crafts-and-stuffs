@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Miss A | Crafts and Stuffs</title>
+
+<link rel="icon" type="image/png" href="images/logo.png">
+<link rel="apple-touch-icon" href="images/logo.png">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<!-- 🏠 DASHBOARD -->
+<a href="index.html" class="dashboard-btn">🏠 Dashboard</a>
+
+<section class="custom">
+
+<div class="custom-box">
+
+<h1>Mirror Keychains ✨</h1>
+
+<p>Choose your favorite design</p>
+
+<div class="products">
+
+<!-- 🔵 Blue -->
+<div class="product">
+<img src="images/keychain.png">
+
+<h3>Blue</h3>
+
+<p>Price: ₱50</p>
+
+<center>
+<button onclick="addKeychain('Blue',50)">
+Add To Cart
+</button>
+</center>
+
+</div>
+
+<!-- 🍇 Grape -->
+<div class="product">
+
+<img src="images/keychain2.png">
+
+<h3>Grape</h3>
+
+<p>Price: ₱50</p>
+
+<center>
+<button onclick="addKeychain('Grape',50)">
+Add To Cart
+</button>
+</center>
+
+</div>
+
+<!-- 🍪 Cookie -->
+<div class="product">
+
+<img src="images/keychain3.png">
+
+<h3>Cookie</h3>
+
+<p>Price: ₱55</p>
+
+<center>
+<button onclick="addKeychain('Cookie',55)">
+Add To Cart
+</button>
+</center>
+
+</div>
+
+<!-- 🌼 Gerberra -->
+<div class="product">
+
+<img src="images/keychain4.png">
+
+<h3>Gerberra</h3>
+
+<p>Price: ₱40</p>
+
+<center>
+<button onclick="addKeychain('Gerberra',40)">
+Add To Cart
+</button>
+</center>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<script src="cart.js"></script>
+
+<script>
+
+function addKeychain(
+productName,
+price
+){
+
+addToCart(
+productName,
+price
+);
+
+}
+
+</script>
+
+</body>
+</html>

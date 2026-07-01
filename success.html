@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Order Success</title>
+
+  <!-- Browser tab icon (Desktop + most browsers) -->
+<link rel="icon" type="image/png" href="images/logo.png">
+
+<!-- Icon when saved to iPhone/iPad home screen -->
+<link rel="apple-touch-icon" href="images/logo.png">
+
+<link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      text-align: center;
+      padding: 50px;
+      background: #e28e8e;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      display: inline-block;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: rgb(227, 149, 149);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h1>🎉 Order Placed Successfully!</h1>
+
+    <p>Thank you for your order.</p>
+
+    <h3 id="orderId"></h3>
+
+    <br>
+    <a href="index.html">Back to Home</a>
+  </div>
+
+  <script>
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    // Get latest order
+    const lastOrder = orders[orders.length - 1];
+
+    if (lastOrder) {
+      document.getElementById("orderId").innerText =
+        "Order ID: " + lastOrder.id;
+    }
+  </script>
+
+</body>
+</html>
